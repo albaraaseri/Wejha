@@ -285,14 +285,17 @@ def get_tts_service() -> TextToSpeechService:
     """
     global _tts_singleton
     if _tts_singleton is None:
+        from twuaqirag.core.config import config
+        
         _tts_singleton = TextToSpeechService(
             TTSConfig(
                 model_en=os.getenv("TTS_MODEL_EN", "en_US-lessac-medium"),
                 model_ar=os.getenv("TTS_MODEL_AR", "ar_JO-kareem-medium"),
-                models_dir=os.getenv("TTS_MODELS_DIR", "./models/piper"),
+                models_dir=os.getenv("TTS_MODELS_DIR", str(config.MODELS_DIR / "piper")),
                 sample_rate=int(os.getenv("TTS_SAMPLE_RATE", "22050")),
                 enabled=os.getenv("TTS_ENABLED", "true").lower() == "true",
             )
         )
     return _tts_singleton
+
 

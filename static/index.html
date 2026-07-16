@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Indoor Navigation Assistant Chatbot</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -26,7 +27,7 @@
         .chat-container {
             width: 100%;
             max-width: 800px;
-            height: 90vh;
+            height: 100vh;
             background: white;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -340,6 +341,35 @@
             display: none;
         }
 
+        /* ✅ Back Button */
+        .back-btn {
+            position: absolute;
+            top: 28px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 20px;
+            /* Slightly larger for arrow */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, transform 0.2s ease;
+            z-index: 10;
+            padding-bottom: 2px;
+            /* Visual adjustment for arrow alignment */
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateX(2px);
+            /* Slight move right on hover */
+        }
+
         @media (max-width: 768px) {
             .chat-container {
                 height: 100vh;
@@ -358,6 +388,9 @@
                 <h1>المساعد المكاني الذكي</h1>
                 <p>أخبرني ماهي وجهتك وسأوصلك إليها مباشرة</p>
             </div>
+
+            <!-- ✅ Back Button -->
+            <button class="back-btn" onclick="goToAR()">→</button>
         </div>
 
         <!-- Messages -->
@@ -394,6 +427,15 @@
             </button>
         </div>
     </div>
+
+    <!-- ✅ UniWebView Bridge -->
+    <script>
+        function goToAR() {
+            console.log("Exiting to AR...");
+            window.location.href = "uniwebview://close";
+        }
+    </script>
+
     <script src="/static/app.js?v=2"></script>
 </body>
 

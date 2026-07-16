@@ -141,6 +141,107 @@ async function sendVoiceMessage() {
     }
 }
 
+// ===== POI Link Conversion =====
+
+// List of all POIs that should be converted to links
+// List of all POIs with English match keys and Arabic match values
+// If key starts with 'B', value stays same. Otherwise, translate to Arabic.
+const POI_MAP = {
+    "Entrance": "المدخل",
+    "Reception": "الاستقبال",
+    "Waiting Area": "منطقة الانتظار",
+    "Elevator 1": "1 المصعد",
+    "Elevator 2": "المصعد 2",
+    "Dunkin' Donuts": "دانكن دونتس",
+    "Male Toilet": "دورة مياه الرجال",
+    "Female Toilet": "دورة مياه النساء",
+    "Rest Area 1": "منطقة استراحة 1",
+    "Rest Area 2": "منطقة استراحة 2",
+    "Rest Area 3": "منطقة استراحة 3",
+    "Maps": "مابز",
+    "Cafeteria": "الكافتيريا",
+    "Saldwich": "ساندويش",
+    "Subway": "صب واي",
+    "School Principal": "مدير المدرسة",
+    "Female Prayer Room": "مصلى النساء",
+    "Male Prayer Room": "مصلى الرجال",
+    "Emergency Exit 1": "مخرج طوارئ 1",
+    "Emergency Exit 2": "مخرج طوارئ 2",
+    // Items starting with B keep their English name
+    "B0-1": "B0-1",
+    "B1-1": "B1-1",
+    "B1-2": "B1-2",
+    "B1-3": "B1-3",
+    "B1-4": "B1-4",
+    "B1-5": "B1-5",
+    "B1-6": "B1-6",
+    "B1-7": "B1-7",
+    "B1-8": "B1-8",
+    "B1-9": "B1-9"
+};
+
+/**
+ * Convert POI names (English and Arabic) in text to clickable uniwebview links
+ * @param {string} html - The HTML content to process
+ * @returns {string} - HTML with POI names converted to links
+ */
+function convertPOIsToLinks(html) {
+    let result = html;
+
+    // 1. Flatten map into a list of { textToMatch, key, displayOverride }
+    // e.g. [{ text: "Entrance", key: "Entrance" }, { text: "المدخل", key: "Entrance" }]
+    let matchTargets = [];
+
+    Object.keys(POI_MAP).forEach(key => {
+        const arabicValue = POI_MAP[key];
+
+        // Add English match
+        matchTargets.push({
+            text: key,
+            key: key,
+            display: key // English match -> Display English
+        });
+
+        // Add Arabic match (if different from English)
+        if (arabicValue !== key) {
+            matchTargets.push({
+                text: arabicValue,
+                key: key,
+                display: arabicValue // Arabic match -> Display Arabic
+            });
+        }
+    });
+
+    // 2. Sort by length descending to avoid partial matches
+    matchTargets.sort((a, b) => b.text.length - a.text.length);
+
+    // 3. Iterate and replace
+    matchTargets.forEach(target => {
+        const escaped = target.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // IMPROVED REGEX: Use lookahead/lookbehind or simplistic whitespace checks
+        // \b is unreliable for Arabic. We'll use a boundary check that respects whitespace/punctuation.
+        // Matches if preceded by beginning-of-string or non-word chars, 
+        // and followed by end-of-string or non-word chars.
+        // Added Arabic comma (،), semicolon (؛), question mark (؟) and brackets to the allowed boundaries.
+        const regex = new RegExp(
+            `(?<=^|[\\s.,;!?<>'()"\\[\\]\\-،؛؟])(${escaped})(?=$|[\\s.,;!?<>'()"\\[\\]\\-،؛؟])`,
+            'gi'
+        );
+
+        result = result.replace(regex, (match) => {
+            const encodedKey = encodeURIComponent(target.key); // Always use English key for URL
+
+            return `<a href="uniwebview://select-poi?name=${encodedKey}" 
+                        style="color:#2563eb;font-weight:600;text-decoration:underline;">
+                        ${target.display}
+                    </a>`;
+        });
+    });
+
+    return result;
+}
+
 function addMessage(content, sender, audioBase64 = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}`;
@@ -157,7 +258,13 @@ function addMessage(content, sender, audioBase64 = null) {
 
     // Render Markdown for bot, plain text for user
     if (sender === 'bot') {
-        bubble.innerHTML = window.marked ? marked.parse(content) : content;
+        // First parse markdown
+        let htmlContent = window.marked ? marked.parse(content) : content;
+
+        // Then convert POI names to links
+        htmlContent = convertPOIsToLinks(htmlContent);
+
+        bubble.innerHTML = htmlContent;
 
         // Add Play Button if audio is available
         if (audioBase64) {
@@ -206,6 +313,7 @@ function addMessage(content, sender, audioBase64 = null) {
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
 
 function showTypingIndicator() {
     const id = 'typing-' + Date.now();

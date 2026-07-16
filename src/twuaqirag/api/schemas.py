@@ -13,6 +13,7 @@ class ChatMessage(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     session_id: str
+    audio_base64: Optional[str] = None
 
 
 class ClearHistoryRequest(BaseModel):
