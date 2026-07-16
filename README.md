@@ -1,6 +1,6 @@
-# 🎓 Twuaiq RAG Assistant - FastAPI Edition
+# 🎓 Wejha RAG Assistant - FastAPI Edition
 
-A modern, production-ready Retrieval-Augmented Generation (RAG) chatbot for Twuaiq Academy with FastAPI backend, beautiful web interface, and local speech-to-text capabilities.
+A modern, production-ready Retrieval-Augmented Generation (RAG) chatbot for Wejha with FastAPI backend, beautiful web interface, and local speech-to-text capabilities.
 
 ## ✨ Features
 
